@@ -1,0 +1,43 @@
+name: OWASP ZAP Security Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 1' # Runs every Monday
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Start Target Application (If Required)
+        run: |
+          docker-compose up -d  # Start your app if running in Docker
+          sleep 30  # Wait for the app to initialize
+
+      - name: Run OWASP ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: "http://13.213.68.246/vulnerable-app/index.php"  # Replace with your target URL
+          fail_action: false  # Set to true if you want the job to fail on vulnerabilities
+          rules_file_name: ".zap/rules.tsv"  # Optional custom rules
+
+      - name: Upload ZAP Scan Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-report
+          path: report_html
+
+      - name: Save ZAP Logs
+        run: |
+          mkdir -p logs
+          mv zap.log logs/zap.log
+        continue-on-error: true
