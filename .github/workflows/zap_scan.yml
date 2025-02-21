@@ -1,43 +1,17 @@
-name: OWASP ZAP Security Scan
+name: OWASP ZAP Integration with GitHub Actions
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  schedule:
-    - cron: '0 0 * * 1' # Runs every Monday
+on: [push]
 
 jobs:
   zap_scan:
     runs-on: ubuntu-latest
-
+    name: Scan the web application
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Start Target Application (If Required)
-        run: |
-          docker-compose up -d  # Start your app if running in Docker
-          sleep 30  # Wait for the app to initialize
-
-      - name: Run OWASP ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          target: "http://13.213.62.204/vulnerable-app/index.php"  # Replace with your target URL
-          fail_action: false  # Set to true if you want the job to fail on vulnerabilities
-          rules_file_name: ".zap/rules.tsv"  # Optional custom rules
-
-      - name: Upload ZAP Scan Report
-        uses: actions/upload-artifact@v3
+          ref: master
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.14.0
         with:
-          name: zap-report
-          path: report_html
-
-      - name: Save ZAP Logs
-        run: |
-          mkdir -p logs
-          mv zap.log logs/zap.log
-        continue-on-error: true
+          target: 'http://13.213.62.204/Vulnerable-app'
