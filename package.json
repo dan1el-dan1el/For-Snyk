@@ -4,6 +4,6 @@
   "description": "A sample app with security issues",
   "main": "index.js",
   "dependencies": {
-    "express": "4.0.0"
+    "express": "4.21.2"
   }
 }
